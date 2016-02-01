@@ -1,6 +1,7 @@
 import '../../styles/app.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 import Reflux from 'reflux';
 import { Paper } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
@@ -19,7 +20,7 @@ import {route, editorValue, scripts} from './stores/main';
 
 var Editor = React.createClass({
   handleOnChange(e){
-    editorValue.set(e);
+    editorValue.set(e, this.props.scriptId);
   },
   render: function() {
     var p = this.props;
@@ -68,6 +69,11 @@ var Root = React.createClass({
   },
   routeChange(e){
     this.setState({route: e});
+    if (e.id === 'loadScript') {
+      this.setState({editorValue: e.content});
+    } else if (e.id === 'newScript') {
+      this.setState({editorValue: ''});
+    }
   },
   editorValueChange(e){
     this.setState({editorValue: e});
@@ -82,7 +88,7 @@ var Root = React.createClass({
           <AppBar title={s.route.title} route={s.route} editorValue={s.editorValue} scripts={s.scripts}/>
           {s.route.id === 'index' ? <div /> : null}
           {s.route.id === 'newScript' ? <Editor editorValue={s.editorValue}/> : null}
-          {s.route.id === 'loadScript' ? <Editor editorValue={s.route.content}/> : null}
+          {s.route.id === 'loadScript' ? <Editor editorValue={s.editorValue} scriptId={s.route.scriptId ? s.route.scriptId : null} /> : null}
         </div>
       );
     }

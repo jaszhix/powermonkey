@@ -1,24 +1,34 @@
 import Reflux from 'reflux';
+import _ from 'lodash';
 
 export var route = Reflux.createStore({
   init(){
-    this.route = {};
+    this.route = {title: 'Powermonkey'};
     this.trigger(this.route);
   },
-  set(id, title, content){
+  set(id, title, content, scriptId){
     this.route.id = id;
     this.route.title = title;
     this.route.content = content;
+    this.route.scriptId = scriptId;
     this.trigger(this.route);
+  },
+  get(){
+    return this.route;
   }
 });
 export var editorValue = Reflux.createStore({
   init(){
-    this.value = null;
+    this.content = null;
+    this.id = null;
   },
-  set(value){
-    this.value = value;
-    this.trigger(this.value);
+  set(content, scriptId){
+    this.content = content;
+    this.id = scriptId;
+    this.trigger(this.content);
+  },
+  getId(){
+    return this.id;
   }
 });
 
@@ -43,8 +53,19 @@ export var scripts = Reflux.createStore({
       this.trigger(this.scripts);
     });
   },
-  save(script){
-    var scriptObject = {timeStamp: Date.now(), title: null, document: script};
+  save(script, scripts){
+    var id = editorValue.getId();
+    if (id) {
+      var existingScript = _.find(this.scripts, {id: id});
+    }
+    var scriptObject = null;
+    if (existingScript) {
+      console.log('existing...',existingScript);
+      scriptObject = {timeStamp: Date.now(), title: existingScript.title, content: script, id: existingScript.id};
+      this.scripts = _.without(this.scripts, existingScript);
+    } else {
+      scriptObject = {timeStamp: Date.now(), title: 'Untitled', content: script, id: _.uniqueId()};
+    }
     this.scripts.push(scriptObject);
     chrome.storage.local.set({scripts: this.scripts});
     this.trigger(this.scripts);

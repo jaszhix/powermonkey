@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 
 import { AppBar } from 'material-ui';
 import { MenuItem } from 'material-ui';
@@ -19,7 +20,7 @@ var Appbar = React.createClass({
   showLeftNavClick() {
     this.setState({leftNavOpen: !this.state.leftNavOpen});
   },
-  handleLinkClick(event, id, title, content){
+  handleLinkClick(event, id, title, content, scriptId){
     var s = this.state;
     
     if (id === 'loadScript' && s.loadScript === 0) {
@@ -28,7 +29,10 @@ var Appbar = React.createClass({
       if (s.loadScript > 0) {
         this.setState({loadScript: 0});
       }
-      route.set(id, title, content);
+      if (typeof content === 'undefined') {
+        content = '';
+      }
+      route.set(id, title, content, scriptId);
       this.showLeftNavClick();
     }
   },
@@ -40,10 +44,10 @@ var Appbar = React.createClass({
           label="Save"
           labelPosition="after"
           primary={true}
-          onTouchTap={()=>scripts.save(p.editorValue)} />
+          onTouchTap={()=>scripts.save(p.editorValue, p.scripts)} />
       );
     };
-    if (p.route.id === 'newScript') {
+    if (p.route.id === 'newScript' || p.route.id === 'loadScript') {
       return save();
     } else {
       return <div />;
@@ -57,6 +61,9 @@ var Appbar = React.createClass({
       {text: 'Load Script', id: 'loadScript'},
       {text: 'Settings', id: 'settings'}
     ];
+    if (p.scripts.length === 0) {
+      menuItems = _.without(menuItems, menuItems[1]);
+    }
     return (
       <div>
         <AppBar {...this.props} style={{backgroundColor: 'rgb(77, 79, 72)', color: 'rgba(255, 255, 255, 0.81)'}} 
@@ -67,7 +74,7 @@ var Appbar = React.createClass({
           width={200} 
           open={this.state.leftNavOpen}>
           {s.loadScript > 0 ? p.scripts.map((script, i)=>{
-            return <MenuItem key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.timeStamp} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.timeStamp, script.document)}/>;
+            return <MenuItem key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.timeStamp} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}/>;
           }) :
           menuItems.map((item, i)=>{
             return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.text} onTouchTap={(e)=>this.handleLinkClick(e, item.id, item.text)}/>;
