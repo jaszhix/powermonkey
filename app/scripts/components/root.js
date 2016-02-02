@@ -16,7 +16,7 @@ import AceEditor from 'react-ace';
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 
-import {route, editorValue, scripts} from './stores/main';
+import {route, editorValue, scripts, scriptTitleField} from './stores/main';
 
 var Editor = React.createClass({
   handleOnChange(e){
@@ -58,6 +58,7 @@ var Root = React.createClass({
   getInitialState(){
     return {
       route: {id: 'index', title: 'Powermonkey'},
+      scriptTitleField: '',
       editorValue: '',
       scripts: []
     };
@@ -66,6 +67,7 @@ var Root = React.createClass({
     this.listenTo(route, this.routeChange);
     this.listenTo(editorValue, this.editorValueChange);
     this.listenTo(scripts, this.scriptsChange);
+    this.listenTo(scriptTitleField, this.scriptTitleFieldChange);
   },
   routeChange(e){
     this.setState({route: e});
@@ -81,11 +83,14 @@ var Root = React.createClass({
   scriptsChange(e){
     this.setState({scripts: e});
   },
+  scriptTitleFieldChange(e){
+    this.setState({scriptTitleField: e});
+  },
   render() {
     var s = this.state;
     return (
         <div {...this.props}>
-          <AppBar title={s.route.title} route={s.route} editorValue={s.editorValue} scripts={s.scripts}/>
+          <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
           {s.route.id === 'index' ? <div /> : null}
           {s.route.id === 'newScript' ? <Editor editorValue={s.editorValue}/> : null}
           {s.route.id === 'loadScript' ? <Editor editorValue={s.editorValue} scriptId={s.route.scriptId ? s.route.scriptId : null} /> : null}

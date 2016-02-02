@@ -53,21 +53,37 @@ export var scripts = Reflux.createStore({
       this.trigger(this.scripts);
     });
   },
-  save(script, scripts){
+  save(script, title){
     var id = editorValue.getId();
     if (id) {
       var existingScript = _.find(this.scripts, {id: id});
     }
+    var _title = title ? title : existingScript ? existingScript.title : 'Untitled';
     var scriptObject = null;
     if (existingScript) {
       console.log('existing...',existingScript);
-      scriptObject = {timeStamp: Date.now(), title: existingScript.title, content: script, id: existingScript.id};
+      scriptObject = {timeStamp: Date.now(), title: _title, content: script, id: existingScript.id};
       this.scripts = _.without(this.scripts, existingScript);
     } else {
-      scriptObject = {timeStamp: Date.now(), title: 'Untitled', content: script, id: _.uniqueId()};
+      scriptObject = {timeStamp: Date.now(), title: _title, content: script, id: _.uniqueId()};
     }
     this.scripts.push(scriptObject);
     chrome.storage.local.set({scripts: this.scripts});
     this.trigger(this.scripts);
+  }
+});
+
+export var scriptTitleField = Reflux.createStore({
+  init(){
+    this.title = null;
+  }, 
+  set(title){
+    this.title = title;
+    this.trigger(this.title);
+  },
+  save(){
+    var _route = route.get();
+    var title = this.title.length > 0 ? this.title : _route.title;
+    route.set(_route.id, title, _route.content, _route.scriptId);
   }
 });
