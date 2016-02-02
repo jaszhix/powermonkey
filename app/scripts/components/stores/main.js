@@ -7,7 +7,7 @@ export var route = Reflux.createStore({
     this.trigger(this.route);
   },
   set(id, title, content, scriptId){
-    
+    // route props - id: page state, title: page/document title, content: document itself, scriptId: ref key for document
     this.route.id = id;
     this.route.title = title;
     this.route.content = content;
@@ -24,6 +24,7 @@ export var editorValue = Reflux.createStore({
     this.id = null;
   },
   set(content, scriptId){
+    // editorValue props - content: code editor state, scriptId: ref key for document
     this.content = content;
     this.id = scriptId;
     this.trigger(this.content);
@@ -66,9 +67,14 @@ export var scripts = Reflux.createStore({
       scriptObject = {timeStamp: Date.now(), title: _title, content: script, id: existingScript.id};
       this.scripts = _.without(this.scripts, existingScript);
     } else {
-      scriptObject = {timeStamp: Date.now(), title: _title, content: script, id: _.uniqueId()};
+      scriptObject = {timeStamp: Date.now(), title: _title, content: script, id: _.floor(Date.now() / Math.random())};
     }
     this.scripts.push(scriptObject);
+    chrome.storage.local.set({scripts: this.scripts});
+    this.trigger(this.scripts);
+  },
+  remove(script){
+    this.scripts = _.without(this.scripts, script);
     chrome.storage.local.set({scripts: this.scripts});
     this.trigger(this.scripts);
   }
@@ -86,5 +92,15 @@ export var scriptTitleField = Reflux.createStore({
     var _route = route.get();
     var title = this.title ? this.title : _route.title;
     route.set(_route.id, title, _route.content, _route.scriptId);
+  }
+});
+
+export var editorRelay = Reflux.createStore({
+  init(){
+    this.editor = null;
+  },
+  set(editor){
+    this.editor = editor;
+    this.trigger(this.editor);
   }
 });
