@@ -71,9 +71,9 @@ var Appbar = React.createClass({
     var s = this.state;
     var p = this.props;
     var menuItems = [
-      {text: 'New Script', id: 'newScript'},
-      {text: 'Load Script', id: 'loadScript'},
-      {text: 'Settings', id: 'settings'}
+      {title: 'New Script', id: 'newScript'},
+      {title: 'Load Script', id: 'loadScript'},
+      {title: 'Settings', id: 'settings'}
     ];
     if (p.scripts.length === 0) {
       menuItems = _.without(menuItems, menuItems[1]);
@@ -95,7 +95,8 @@ var Appbar = React.createClass({
             return <MenuItem key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.title} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}/>;
           }) :
           menuItems.map((item, i)=>{
-            return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.text} onTouchTap={(e)=>this.handleLinkClick(e, item.id, item.text)}/>;
+            var title = item.id === 'newScript' ? 'Untitled' : item.title;
+            return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)}/>;
           })
         }
         </LeftNav>
