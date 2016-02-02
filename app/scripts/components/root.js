@@ -11,16 +11,19 @@ import AppBar from './appbar.js';
 import injectTapEventPlugin from "react-tap-event-plugin";
 injectTapEventPlugin();
 import brace from 'brace';
-import AceEditor from 'react-ace';
+import AceEditor from './aceEditor';
  
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
+import 'brace/ext/searchbox';
+import 'brace/ext/settings_menu';
 
-import {route, editorValue, scripts, scriptTitleField} from './stores/main';
+import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
 
 var Editor = React.createClass({
   handleOnChange(e){
     editorValue.set(e, this.props.scriptId);
+    console.log(this.props.editor.session.doc.$lines.length)
   },
   render: function() {
     var p = this.props;
@@ -40,9 +43,10 @@ var Editor = React.createClass({
                   mode="javascript"
                   theme="monokai"
                   onChange={this.handleOnChange}
-                  name="UNIQUE_ID_OF_DIV"
-                  editorProps={{$blockScrolling: true}}
+                  name="mk-code-editor"
+                  editorProps={{$blockScrolling: 'Infinity'}}
                   value={p.editorValue}
+                  minLines={1}
                 />
               </Paper>
             </Box>
@@ -60,7 +64,8 @@ var Root = React.createClass({
       route: {id: 'index', title: 'Powermonkey'},
       scriptTitleField: '',
       editorValue: '',
-      scripts: []
+      scripts: [],
+      editor: null
     };
   },
   componentDidMount(){
@@ -69,6 +74,7 @@ var Root = React.createClass({
     this.listenTo(editorValue, this.editorValueChange);
     this.listenTo(scripts, this.scriptsChange);
     this.listenTo(scriptTitleField, this.scriptTitleFieldChange);
+    this.listenTo(editorRelay, this.editorRelayChange);
   },
   routeChange(e){
     this.setState({route: e});
@@ -78,9 +84,12 @@ var Root = React.createClass({
       this.setState({editorValue: ''});
     }
   },
-  editorValueChange(e){
-    // editorValue props - content: 
+  editorValueChange(e){ 
     this.setState({editorValue: e});
+  },
+  editorRelayChange(e){
+    this.setState({editor: e});
+    console.log('..',e,e.se)
   },
   scriptsChange(e){
     this.setState({scripts: e});
@@ -94,8 +103,8 @@ var Root = React.createClass({
         <div {...this.props}>
           <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
           {s.route.id === 'index' ? <div /> : null}
-          {s.route.id === 'newScript' ? <Editor editorValue={s.editorValue}/> : null}
-          {s.route.id === 'loadScript' ? <Editor editorValue={s.editorValue} scriptId={s.route.scriptId ? s.route.scriptId : null} /> : null}
+          {s.route.id === 'newScript' ? <Editor editor={s.editor} editorValue={s.editorValue}/> : null}
+          {s.route.id === 'loadScript' ? <Editor editor={s.editor} editorValue={s.editorValue} scriptId={s.route.scriptId ? s.route.scriptId : null} /> : null}
         </div>
       );
     }
