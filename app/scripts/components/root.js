@@ -1,7 +1,6 @@
 import '../../styles/app.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import _ from 'lodash';
 import Reflux from 'reflux';
 import { Paper } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
@@ -17,13 +16,17 @@ import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 import 'brace/ext/searchbox';
 import 'brace/ext/settings_menu';
+import 'brace/ext/statusbar';
 
 import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
 
 var Editor = React.createClass({
+  componentWillReceiveProps(nextProps){
+    editorValue.setId(nextProps.scriptId);
+  },
   handleOnChange(e){
     editorValue.set(e, this.props.scriptId);
-    console.log(this.props.editor.session.doc.$lines.length)
+    console.log('Lines: ',this.props.editor.session.doc.$lines.length);
   },
   render: function() {
     var p = this.props;
@@ -47,6 +50,7 @@ var Editor = React.createClass({
                   editorProps={{$blockScrolling: 'Infinity'}}
                   value={p.editorValue}
                   minLines={1}
+                  tabSize={2}
                 />
               </Paper>
             </Box>
@@ -77,10 +81,11 @@ var Root = React.createClass({
     this.listenTo(editorRelay, this.editorRelayChange);
   },
   routeChange(e){
+    var s = this.state;
     this.setState({route: e});
     if (e.id === 'loadScript') {
       this.setState({editorValue: e.content});
-    } else if (e.id === 'newScript') {
+    } else if (e.id === 'newScript' && s.route.title.length > 0 && s.scriptTitleField.length === 0) {
       this.setState({editorValue: ''});
     }
   },
@@ -89,7 +94,7 @@ var Root = React.createClass({
   },
   editorRelayChange(e){
     this.setState({editor: e});
-    console.log('..',e,e.se)
+    console.log('..',e);
   },
   scriptsChange(e){
     this.setState({scripts: e});
@@ -103,8 +108,8 @@ var Root = React.createClass({
         <div {...this.props}>
           <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
           {s.route.id === 'index' ? <div /> : null}
-          {s.route.id === 'newScript' ? <Editor editor={s.editor} editorValue={s.editorValue}/> : null}
-          {s.route.id === 'loadScript' ? <Editor editor={s.editor} editorValue={s.editorValue} scriptId={s.route.scriptId ? s.route.scriptId : null} /> : null}
+          {s.route.id === 'newScript' ? <Editor editor={s.editor} editorValue={s.editorValue}/> : s.route.id === 'loadScript' ? <Editor editor={s.editor} editorValue={s.editorValue} routeId={s.route.id} scriptId={s.route.scriptId} /> : null}
+          
         </div>
       );
     }
