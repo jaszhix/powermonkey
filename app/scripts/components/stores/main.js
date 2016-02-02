@@ -26,8 +26,10 @@ export var editorValue = Reflux.createStore({
   set(content, scriptId){
     // editorValue props - content: code editor state, scriptId: ref key for document
     this.content = content;
-    this.id = scriptId;
     this.trigger(this.content);
+  },
+  setId(scriptId){
+    this.id = scriptId;
   },
   getId(){
     return this.id;

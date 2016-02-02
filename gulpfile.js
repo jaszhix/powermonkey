@@ -88,7 +88,7 @@ var config = {
   entry: '',
   module: {
     loaders: [{
-      test: /\.js$/,
+      test: /\.(js|jsx)$/,
       loader: 'babel'
     },{
       test: /\.css$/,
