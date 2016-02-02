@@ -93,11 +93,12 @@ var Appbar = React.createClass({
           width={200} 
           open={this.state.leftNavOpen}>
           {s.loadScript > 0 ? p.scripts.map((script, i)=>{
-            return <MenuItem key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.title} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}/>;
+            return <MenuItem {...this.props} key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.title} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)} 
+            rightIcon={<i className="fa fa-times" onClick={()=>scripts.remove(script)}/> }/>;
           }) :
           menuItems.map((item, i)=>{
             var title = item.id === 'newScript' ? 'Untitled' : item.title;
-            return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)}/>;
+            return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)} />;
           })
         }
         </LeftNav>
