@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { AppBar } from 'material-ui';
 import { MenuItem } from 'material-ui';
 import { LeftNav, FlatButton, TextField } from 'material-ui';
+import Delete from 'material-ui/lib/svg-icons/action/delete';
 
 import {route, scripts, scriptTitleField} from './stores/main';
 
@@ -14,6 +15,19 @@ var Field = React.createClass({
       <div style={{position: 'absolute', top: '-15px'}} >
         <TextField style={{color: '#FFF'}} value={p.scriptTitleField} onChange={(e)=>scriptTitleField.set(e.target.value)} onEnterKeyDown={()=>scriptTitleField.save()} floatingLabelText="Enter Title" floatingLabelStyle={{color: 'rgb(191, 226, 236)'}} underlineFocusStyle={{borderColor: '#77959D'}} underlineStyle={{borderColor: '#77959D'}} hintStyle={{color: '#FFF'}} inputStyle={{color: '#FFF'}}/>
       </div>
+    );
+  }
+});
+
+var RemoveScriptBtn = React.createClass({
+  handleClick(e){
+    e.preventDefault();
+    e.stopPropagation();
+    scripts.remove(this.props.script);
+  },
+  render: function() {
+    return (
+      <Delete style={{float: 'right', marginTop: '11px'}} color="rgb(221, 222, 220)" hoverColor="rgb(187, 221, 231)" onTouchTap={this.handleClick}/>
     );
   }
 });
@@ -29,7 +43,11 @@ var Appbar = React.createClass({
     title: React.PropTypes.string
   },
   showLeftNavClick() {
-    this.setState({leftNavOpen: !this.state.leftNavOpen});
+    var s = this.state;
+    this.setState({leftNavOpen: !s.leftNavOpen});
+    if (s.loadScript > 0 && !s.leftNavOpen) {
+      this.setState({loadScript: 0});
+    }
   },
   handleLinkClick(event, id, title, content, scriptId){
     var s = this.state;
@@ -37,7 +55,7 @@ var Appbar = React.createClass({
     if (id === 'loadScript' && s.loadScript === 0) {
       this.setState({loadScript: ++s.loadScript});
     } else {
-      if (s.loadScript > 0) {
+      if (s.loadScript > 0 || !s.leftNavOpen) {
         this.setState({loadScript: 0});
       }
       route.set(id, title, content, scriptId);
@@ -64,7 +82,7 @@ var Appbar = React.createClass({
   handleTitle(){
     var p = this.props;
     if (p.route.title && p.route.id === 'newScript' || p.route.id === 'loadScript') {
-      route.set(p.route.id, null, p.route.content, p.route.scriptId);
+      route.set(p.route.id, '', p.editorValue, p.route.scriptId);
     }
   },
   render() {
@@ -93,8 +111,7 @@ var Appbar = React.createClass({
           width={200} 
           open={this.state.leftNavOpen}>
           {s.loadScript > 0 ? p.scripts.map((script, i)=>{
-            return <MenuItem {...this.props} key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={script.title} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)} 
-            rightIcon={<i className="fa fa-times" onClick={()=>scripts.remove(script)}/> }/>;
+            return <MenuItem {...this.props} key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={_.truncate(script.title, {length: 20})} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}><RemoveScriptBtn script={script}/></MenuItem>;
           }) :
           menuItems.map((item, i)=>{
             var title = item.id === 'newScript' ? 'Untitled' : item.title;
