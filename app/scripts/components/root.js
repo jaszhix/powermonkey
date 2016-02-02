@@ -2,6 +2,7 @@ import '../../styles/app.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
+import _ from 'lodash';
 import { Paper } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
 import Col from './FlexboxGrid/Col.js';
@@ -9,20 +10,31 @@ import Box from './FlexboxGrid/Box.js';
 import AppBar from './appbar.js';
 import injectTapEventPlugin from "react-tap-event-plugin";
 injectTapEventPlugin();
-import brace from 'brace';
+import ace from 'brace';
+window.ace = ace;
 import AceEditor from './aceEditor';
  
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
 import 'brace/ext/searchbox';
 import 'brace/ext/settings_menu';
-import 'brace/ext/statusbar';
+import 'brace/ext/language_tools';
+
 
 import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
-
+var test = 2;
 var Editor = React.createClass({
+  getInitialState(){
+    return {
+      renderEditor: true
+    };
+  },
   componentWillReceiveProps(nextProps){
     editorValue.setId(nextProps.scriptId);
+  },
+  updateOptions(){
+    this.setState({renderEditor: false});
+    this.setState({renderEditor: true});
   },
   handleOnChange(e){
     editorValue.set(e, this.props.scriptId);
@@ -30,6 +42,7 @@ var Editor = React.createClass({
   },
   render: function() {
     var p = this.props;
+    var s = this.state;
     return (
       <div className="Editor">
         <Row>
@@ -39,19 +52,28 @@ var Editor = React.createClass({
                 style={{backgroundColor: '#272822'}}
                 zDepth={ 1 }
                 rounded={ true }>
-                <AceEditor
-                  height="100%"
-                  width="100%"
-                  fontSize={16}
-                  mode="javascript"
-                  theme="monokai"
-                  onChange={this.handleOnChange}
-                  name="mk-code-editor"
-                  editorProps={{$blockScrolling: 'Infinity'}}
-                  value={p.editorValue}
-                  minLines={1}
-                  tabSize={2}
-                />
+                {s.renderEditor ? 
+                  <AceEditor
+                    height="100%"
+                    width="100%"
+                    fontSize={16}
+                    mode="javascript"
+                    theme="monokai"
+                    onChange={this.handleOnChange}
+                    name="mk-code-editor"
+                    editorProps={{$blockScrolling: 'Infinity'}}
+                    value={p.editorValue}
+                    setOptions={
+                          { enableBasicAutocompletion: true,
+                            enableLiveAutocompletion: true,
+                            minLines: 1,
+                            tabSize: test,
+                            highlightActiveLine: true,
+                            readOnly: false
+                        }
+                      }
+                  /> : null}
+                <div ref="statusBar" />
               </Paper>
             </Box>
           </Col>
@@ -109,7 +131,6 @@ var Root = React.createClass({
           <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
           {s.route.id === 'index' ? <div /> : null}
           {s.route.id === 'newScript' ? <Editor editor={s.editor} editorValue={s.editorValue}/> : s.route.id === 'loadScript' ? <Editor editor={s.editor} editorValue={s.editorValue} routeId={s.route.id} scriptId={s.route.scriptId} /> : null}
-          
         </div>
       );
     }
