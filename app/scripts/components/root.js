@@ -64,6 +64,7 @@ var Root = React.createClass({
     };
   },
   componentDidMount(){
+    // Reflux listeners
     this.listenTo(route, this.routeChange);
     this.listenTo(editorValue, this.editorValueChange);
     this.listenTo(scripts, this.scriptsChange);
@@ -78,6 +79,7 @@ var Root = React.createClass({
     }
   },
   editorValueChange(e){
+    // editorValue props - content: 
     this.setState({editorValue: e});
   },
   scriptsChange(e){

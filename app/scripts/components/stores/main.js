@@ -7,6 +7,7 @@ export var route = Reflux.createStore({
     this.trigger(this.route);
   },
   set(id, title, content, scriptId){
+    
     this.route.id = id;
     this.route.title = title;
     this.route.content = content;
@@ -83,7 +84,7 @@ export var scriptTitleField = Reflux.createStore({
   },
   save(){
     var _route = route.get();
-    var title = this.title.length > 0 ? this.title : _route.title;
+    var title = this.title ? this.title : _route.title;
     route.set(_route.id, title, _route.content, _route.scriptId);
   }
 });

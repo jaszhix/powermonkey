@@ -81,12 +81,13 @@ var Appbar = React.createClass({
     return (
       <div>
         <AppBar onTitleTouchTap={this.handleTitle} 
-          title={p.route.title ? p.route.title : <Field scriptTitleField={p.scriptTitleField}/>} 
+          title={p.route.title ? p.route.title : <Field scriptTitleField={p.scriptTitleField}/>}
+          titleStyle={{cursor: 'pointer'}}
           style={{backgroundColor: 'rgb(77, 79, 72)', color: 'rgba(255, 255, 255, 0.81)'}} 
           onLeftIconButtonTouchTap={this.showLeftNavClick} 
-          iconElementRight={this.getAppBarChildren()}/>
+          iconElementRight={this.getAppBarChildren()} zDepth={0}/>
         <LeftNav className="mk-left-nav" 
-          style={{color: 'rgba(255, 255, 255, 0.81)', backgroundColor: 'rgb(71, 75, 62)', zIndex: '9999'}} 
+          style={{color: 'rgba(255, 255, 255, 0.81)', backgroundColor: 'rgb(77, 79, 72)', zIndex: '9999', top: '64px'}} 
           ref="leftNav" 
           docked={true} 
           width={200} 
