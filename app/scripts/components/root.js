@@ -1,18 +1,20 @@
-import '../../styles/app.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
 import _ from 'lodash';
-import { Paper } from 'material-ui';
+import v from 'vquery';
+window.v = v;
+import { Paper, Menu, MenuItem, Divider } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
 import Col from './FlexboxGrid/Col.js';
 import Box from './FlexboxGrid/Box.js';
-import AppBar from './appbar.js';
 import injectTapEventPlugin from "react-tap-event-plugin";
 injectTapEventPlugin();
 import ace from 'brace';
 window.ace = ace;
 import AceEditor from './aceEditor';
+import AppBar from './appbar.js';
+import Settings from './settings';
  
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
@@ -22,7 +24,6 @@ import 'brace/ext/language_tools';
 
 
 import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
-var test = 2;
 var Editor = React.createClass({
   getInitialState(){
     return {
@@ -67,7 +68,7 @@ var Editor = React.createClass({
                           { enableBasicAutocompletion: true,
                             enableLiveAutocompletion: true,
                             minLines: 1,
-                            tabSize: test,
+                            tabSize: 2,
                             highlightActiveLine: true,
                             readOnly: false
                         }
@@ -83,16 +84,32 @@ var Editor = React.createClass({
   }
 });
 
+var Route = React.createClass({
+  render: function() {
+    var p = this.props;
+    return (
+      <div className="route">
+        {p.route.id === 'index' ? <div /> : null}
+        {p.route.id === 'newScript' ? <Editor editor={p.editor} editorValue={p.editorValue}/> : p.route.id === 'loadScript' ? <Editor editor={p.editor} editorValue={p.editorValue} routeId={p.route.id} scriptId={p.route.scriptId} /> : null}
+        {p.route.id === 'settings' ? <Settings /> : null}
+      </div>
+    );
+  }
+});
+
 var Root = React.createClass({
   mixins: [Reflux.ListenerMixin],
   getInitialState(){
     return {
-      route: {id: 'index', title: 'Powermonkey'},
+      route: v('#options').node() ? {id: 'settings', title: 'Settings'} : {id: 'index', title: 'Powermonkey'},
       scriptTitleField: '',
       editorValue: '',
       scripts: [],
       editor: null
     };
+  },
+  componentWillMount(){
+    require('../../styles/app.scss');
   },
   componentDidMount(){
     // Reflux listeners
@@ -129,11 +146,29 @@ var Root = React.createClass({
     return (
         <div {...this.props}>
           <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
-          {s.route.id === 'index' ? <div /> : null}
-          {s.route.id === 'newScript' ? <Editor editor={s.editor} editorValue={s.editorValue}/> : s.route.id === 'loadScript' ? <Editor editor={s.editor} editorValue={s.editorValue} routeId={s.route.id} scriptId={s.route.scriptId} /> : null}
+          <Route route={s.route} editor={s.editor} editorValue={s.editorValue} />
         </div>
       );
     }
 });
 
-ReactDOM.render(<Root />, document.getElementById('main'));
+var Action = React.createClass({
+  componentWillMount(){
+    require('../../styles/action.scss');
+  },
+  openApp(){
+    chrome.tabs.create({url: chrome.runtime.getURL('./index.html')});
+  },
+  render: function() {
+    return (
+      <div>
+        <MenuItem onTouchTap={this.openApp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText="Powermonkey" />
+        <MenuItem onTouchTap={()=>chrome.runtime.openOptionsPage()} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText="Settings" />
+      </div>
+    );
+  }
+});
+
+v(document).ready(()=>{
+  ReactDOM.render(v('#action').node() ? <Action /> : <Root />, document.getElementById('main'));
+});
