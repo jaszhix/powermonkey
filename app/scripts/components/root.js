@@ -77,14 +77,85 @@ var Editor = React.createClass({
   }
 });
 
+var Index = React.createClass({
+  getInitialState(){
+    return {
+      fixedHeader: true,
+      fixedFooter: true,
+      stripedRows: true,
+      showRowHover: true,
+      selectable: true,
+      multiSelectable: true,
+      enableSelectAll: true,
+      deselectOnClickaway: true,
+      height: '300px',
+    };
+  },
+  render: function() {
+    var p = this.props;
+    console.log(p.scripts);
+    return (
+      <div className="Index">
+        <Table 
+          height={this.state.height}
+          fixedHeader={this.state.fixedHeader}
+          fixedFooter={this.state.fixedFooter}
+          selectable={this.state.selectable}
+          multiSelectable={this.state.multiSelectable}
+          onRowSelection={this._onRowSelection}
+         
+        >
+          <TableHeader enableSelectAll={this.state.enableSelectAll}>
+            <TableRow>
+              <TableHeaderColumn colSpan="3" tooltip="Super Header">
+                Scripts
+              </TableHeaderColumn>
+            </TableRow>
+            <TableRow>
+              <TableHeaderColumn tooltip="The ID">ID</TableHeaderColumn>
+              <TableHeaderColumn tooltip="The Name">Name</TableHeaderColumn>
+              <TableHeaderColumn tooltip="The Status">Status</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody
+            deselectOnClickaway={this.state.deselectOnClickaway}
+            showRowHover={this.state.showRowHover}
+            stripedRows={this.state.stripedRows}
+          >
+            {p.scripts.map( (row, index) => (
+              <TableRow key={index} selected={row.selected}>
+                <TableRowColumn>{index}</TableRowColumn>
+                <TableRowColumn>{row.title}</TableRowColumn>
+                <TableRowColumn>{row.timeStamp}</TableRowColumn>
+              </TableRow>
+              ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableRowColumn>ID</TableRowColumn>
+              <TableRowColumn>Name</TableRowColumn>
+              <TableRowColumn>Status</TableRowColumn>
+            </TableRow>
+            <TableRow>
+              <TableRowColumn colSpan="3" style={{textAlign: 'center'}}>
+                Super Footer
+              </TableRowColumn>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </div>
+    );
+  }
+});
+
 var Route = React.createClass({
   render: function() {
     var p = this.props;
     return (
       <div className="route">
-        {p.route.id === 'index' ? <div /> : null}
+        {p.route.id === 'index' ? <Index scripts={p.scripts} /> : null}
         {p.route.id === 'newScript' ? <Editor editor={p.editor} editorValue={p.editorValue}/> : p.route.id === 'loadScript' ? <Editor editor={p.editor} editorValue={p.editorValue} routeId={p.route.id} scriptId={p.route.scriptId} /> : null}
-        {p.route.id === 'settings' ? <Settings /> : null}
+        {p.route.id === 'options' ? <Options appTheme={p.appTheme} /> : null}
       </div>
     );
   }
