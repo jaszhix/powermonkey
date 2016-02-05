@@ -4,17 +4,25 @@ import _ from 'lodash';
 import { MenuItem, Toolbar, ToolbarGroup, ToolbarTitle, LeftNav, FlatButton, TextField } from 'material-ui';
 import Delete from 'material-ui/lib/svg-icons/action/delete';
 import MenuButton from 'material-ui/lib/svg-icons/navigation/menu';
+import onClickOutside from 'react-onclickoutside';
 
 import {route, scripts, scriptTitleField} from './stores/main';
 
 const styles = {
+  toolbar: {backgroundColor: 'rgb(77, 79, 72)', color: 'rgba(255, 255, 255, 0.81)'},
   menuButton: {width: '30px', height: '30px', marginTop: '13px', marginLeft: '10px', marginRight: '10px', color: '#FFF', cursor: 'pointer'},
   leftNav: {zIndex: '49', color: 'rgba(255, 255, 255, 0.81)', backgroundColor: 'rgb(77, 79, 72)', top: '56px'},
+  menuItem: {color: 'rgba(255, 255, 255, 0.81)'},
+  removeScriptButton: {float: 'right', marginTop: '11px'},
   toolbarTitle: {zIndex: '9999', color: '#FFF', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, paddingTop: 0, letterSpacing: 0, fontSize: 24},
   saveButton: {color: '#FFF'}
 };
 
 var Field = React.createClass({
+  mixins: [onClickOutside],
+  handleClickOutside(){
+    scriptTitleField.save();
+  },
   render: function() {
     var p = this.props;
     return (
@@ -33,12 +41,13 @@ var RemoveScriptBtn = React.createClass({
   },
   render: function() {
     return (
-      <Delete style={{float: 'right', marginTop: '11px'}} color="rgb(221, 222, 220)" hoverColor="rgb(187, 221, 231)" onTouchTap={this.handleClick}/>
+      <Delete style={styles.removeScriptButton} color="rgb(221, 222, 220)" hoverColor="rgb(187, 221, 231)" onTouchTap={this.handleClick}/>
     );
   }
 });
 
 var Appbar = React.createClass({
+  mixins: [onClickOutside],
   getInitialState(){
     return {
       leftNavOpen: false,
@@ -47,6 +56,9 @@ var Appbar = React.createClass({
   },
   propTypes: {
     title: React.PropTypes.string
+  },
+  handleClickOutside(){
+    this.showLeftNavClick();
   },
   showLeftNavClick() {
     var s = this.state;
@@ -87,7 +99,7 @@ var Appbar = React.createClass({
     }
     return (
       <div>
-        <Toolbar style={{backgroundColor: 'rgb(77, 79, 72)', color: 'rgba(255, 255, 255, 0.81)'}} >
+        <Toolbar style={styles.toolbar} >
           <ToolbarGroup firstChild={true} float="left">
             <MenuButton color="#FFF" onTouchTap={this.showLeftNavClick} style={styles.menuButton} />
             <LeftNav className="mk-left-nav" 
@@ -97,16 +109,16 @@ var Appbar = React.createClass({
               width={200} 
               open={this.state.leftNavOpen}>
                 {s.loadScript > 0 ? p.scripts.map((script, i)=>{
-                  return <MenuItem {...this.props} key={script.timeStamp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={_.truncate(script.title, {length: 20})} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}><RemoveScriptBtn script={script}/></MenuItem>;
+                  return <MenuItem {...this.props} key={script.timeStamp} style={styles.menuItem} primaryText={_.truncate(script.title, {length: 20})} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}><RemoveScriptBtn script={script}/></MenuItem>;
                 }) :
                 menuItems.map((item, i)=>{
                   var title = item.id === 'newScript' ? 'Untitled' : item.title;
-                  return <MenuItem key={i} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)} />;
+                  return <MenuItem key={i} style={styles.menuItem} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)} />;
                 })}
             </LeftNav>
           </ToolbarGroup>
           <ToolbarGroup {...this.props} float="left">
-            {p.route.title ? <ToolbarTitle {...this.props} onTouchTap={this.handleTitle} text={p.route.title} style={styles.toolbarTitle} /> : <Field scriptTitleField={p.scriptTitleField}/>}
+            {p.route.title ? <ToolbarTitle onTouchTap={this.handleTitle} text={p.route.title} style={styles.toolbarTitle} /> : <Field scriptTitleField={p.scriptTitleField}/>}
           </ToolbarGroup>
           <ToolbarGroup float="right">
             {p.route.id === 'newScript' || p.route.id === 'loadScript' ? 
