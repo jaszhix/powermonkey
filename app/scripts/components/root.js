@@ -34,11 +34,6 @@ var Editor = React.createClass({
       readOnly: false
     };
   },
-  componentDidMount(){
-    setTimeout(()=>{
-      this.setState({tabSize: 4});
-    },2000);
-  },
   componentWillReceiveProps(nextProps){
     editorValue.setId(nextProps.scriptId);
   },
