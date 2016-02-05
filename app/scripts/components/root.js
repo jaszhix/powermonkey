@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
-import _ from 'lodash';
 import v from 'vquery';
 window.v = v;
-import { Paper, Menu, MenuItem, Divider } from 'material-ui';
+import { Paper, MenuItem } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
 import Col from './FlexboxGrid/Col.js';
 import Box from './FlexboxGrid/Box.js';
@@ -22,20 +21,26 @@ import 'brace/ext/searchbox';
 import 'brace/ext/settings_menu';
 import 'brace/ext/language_tools';
 
-
 import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
+
 var Editor = React.createClass({
   getInitialState(){
     return {
-      renderEditor: true
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+      minLines: 1,
+      tabSize: 2,
+      highlightActiveLine: true,
+      readOnly: false
     };
+  },
+  componentDidMount(){
+    setTimeout(()=>{
+      this.setState({tabSize: 4});
+    },2000);
   },
   componentWillReceiveProps(nextProps){
     editorValue.setId(nextProps.scriptId);
-  },
-  updateOptions(){
-    this.setState({renderEditor: false});
-    this.setState({renderEditor: true});
   },
   handleOnChange(e){
     editorValue.set(e, this.props.scriptId);
@@ -53,8 +58,7 @@ var Editor = React.createClass({
                 style={{backgroundColor: '#272822'}}
                 zDepth={ 1 }
                 rounded={ true }>
-                {s.renderEditor ? 
-                  <AceEditor
+                <AceEditor
                     height="100%"
                     width="100%"
                     fontSize={16}
@@ -64,16 +68,8 @@ var Editor = React.createClass({
                     name="mk-code-editor"
                     editorProps={{$blockScrolling: 'Infinity'}}
                     value={p.editorValue}
-                    setOptions={
-                          { enableBasicAutocompletion: true,
-                            enableLiveAutocompletion: true,
-                            minLines: 1,
-                            tabSize: 2,
-                            highlightActiveLine: true,
-                            readOnly: false
-                        }
-                      }
-                  /> : null}
+                    setOptions={s}
+                  />
                 <div ref="statusBar" />
               </Paper>
             </Box>
