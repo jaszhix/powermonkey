@@ -6,16 +6,19 @@ import Delete from 'material-ui/lib/svg-icons/action/delete';
 import MenuButton from 'material-ui/lib/svg-icons/navigation/menu';
 import onClickOutside from 'react-onclickoutside';
 
-import {route, scripts, scriptTitleField} from './stores/main';
+import {route, scripts, scriptTitleField, appTheme} from './stores/main';
+//rgba(255, 255, 255, 0.81)
+//rgb(77, 79, 72)
 
+var _appTheme = appTheme.get();
 const styles = {
-  toolbar: {backgroundColor: 'rgb(77, 79, 72)', color: 'rgba(255, 255, 255, 0.81)'},
-  menuButton: {width: '30px', height: '30px', marginTop: '13px', marginLeft: '10px', marginRight: '10px', color: '#FFF', cursor: 'pointer'},
-  leftNav: {zIndex: '49', color: 'rgba(255, 255, 255, 0.81)', backgroundColor: 'rgb(77, 79, 72)', top: '56px'},
-  menuItem: {color: 'rgba(255, 255, 255, 0.81)'},
+  menuButton: {width: '30px', height: '30px', marginTop: '13px', marginLeft: '10px', marginRight: '10px', cursor: 'pointer'},
+  leftNav: {zIndex: '49', top: '56px'},
   removeScriptButton: {float: 'right', marginTop: '11px'},
-  toolbarTitle: {zIndex: '9999', color: '#FFF', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, paddingTop: 0, letterSpacing: 0, fontSize: 24},
-  saveButton: {color: '#FFF'}
+  toolbarTitle: {color: _appTheme.palette.textColor, zIndex: '9999', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, paddingTop: 0, letterSpacing: 0, fontSize: 24},
+  flatButton: {color: _appTheme.palette.textColor},
+  underlineStyle: {borderColor: '#77959D'},
+  floatingLabelStyle: {color: 'rgb(191, 226, 236)'}
 };
 
 var Field = React.createClass({
@@ -27,7 +30,7 @@ var Field = React.createClass({
     var p = this.props;
     return (
       <div style={{position: 'absolute', top: '-15px'}} >
-        <TextField style={{color: '#FFF'}} value={p.scriptTitleField} onChange={(e)=>scriptTitleField.set(e.target.value)} onEnterKeyDown={()=>scriptTitleField.save()} floatingLabelText="Enter Title" floatingLabelStyle={{color: 'rgb(191, 226, 236)'}} underlineFocusStyle={{borderColor: '#77959D'}} underlineStyle={{borderColor: '#77959D'}} hintStyle={{color: '#FFF'}} inputStyle={{color: '#FFF'}}/>
+        <TextField style={styles.flatButton} value={p.scriptTitleField} onChange={(e)=>scriptTitleField.set(e.target.value)} onEnterKeyDown={()=>scriptTitleField.save()} floatingLabelText="Enter Title" floatingLabelStyle={styles.floatingLabelStyle} underlineStyle={styles.underlineStyle} hintStyle={styles.flatButton} inputStyle={styles.flatButton}/>
       </div>
     );
   }
@@ -57,8 +60,15 @@ var Appbar = React.createClass({
   propTypes: {
     title: React.PropTypes.string
   },
+  componentWillReceiveProps(nextProps){
+    styles.toolbarTitle.color = nextProps.appTheme.palette.textColor;
+    styles.flatButton.color = nextProps.appTheme.palette.textColor;
+
+  },
   handleClickOutside(){
-    this.showLeftNavClick();
+    if (this.state.leftNavOpen) {
+      this.showLeftNavClick();
+    }
   },
   showLeftNavClick() {
     var s = this.state;
@@ -90,16 +100,17 @@ var Appbar = React.createClass({
     var s = this.state;
     var p = this.props;
     var menuItems = [
+      {title: 'Manage', id: 'index'},
       {title: 'New Script', id: 'newScript'},
       {title: 'Load Script', id: 'loadScript'},
-      {title: 'Settings', id: 'settings'}
+      {title: 'Options', id: 'options'}
     ];
     if (p.scripts.length === 0) {
       menuItems = _.without(menuItems, menuItems[1]);
     }
     return (
       <div>
-        <Toolbar style={styles.toolbar} >
+        <Toolbar>
           <ToolbarGroup firstChild={true} float="left">
             <MenuButton color="#FFF" onTouchTap={this.showLeftNavClick} style={styles.menuButton} />
             <LeftNav className="mk-left-nav" 
@@ -109,11 +120,11 @@ var Appbar = React.createClass({
               width={200} 
               open={this.state.leftNavOpen}>
                 {s.loadScript > 0 ? p.scripts.map((script, i)=>{
-                  return <MenuItem {...this.props} key={script.timeStamp} style={styles.menuItem} primaryText={_.truncate(script.title, {length: 20})} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}><RemoveScriptBtn script={script}/></MenuItem>;
+                  return <MenuItem {...this.props} key={script.timeStamp} primaryText={_.truncate(script.title, {length: 20})} onTouchTap={(e)=>this.handleLinkClick(e, 'loadScript', script.title, script.content, script.id)}><RemoveScriptBtn script={script}/></MenuItem>;
                 }) :
                 menuItems.map((item, i)=>{
                   var title = item.id === 'newScript' ? 'Untitled' : item.title;
-                  return <MenuItem key={i} style={styles.menuItem} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)} />;
+                  return <MenuItem key={i} primaryText={item.title} onTouchTap={(e)=>this.handleLinkClick(e, item.id, title)} />;
                 })}
             </LeftNav>
           </ToolbarGroup>
@@ -125,7 +136,7 @@ var Appbar = React.createClass({
             <FlatButton
               label="Save"
               labelPosition="after"
-              style={styles.saveButton}
+              style={styles.flatButton}
               primary={true}
               onTouchTap={()=>scripts.save(p.editorValue, p.route.title)} /> : null}
           </ToolbarGroup>

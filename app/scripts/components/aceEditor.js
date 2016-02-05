@@ -175,7 +175,7 @@ export default class ReactAce extends Component {
       <div
         id={name}
         className={className}
-        style={divStyle}
+        style={this.props.style}
       >
       </div>
     );

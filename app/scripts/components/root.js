@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
+import _ from 'lodash';
 import v from 'vquery';
 window.v = v;
-import { Paper, MenuItem } from 'material-ui';
+import ThemeManager from 'material-ui/lib/styles/theme-manager';
+import { Paper, MenuItem, Table, TableHeader, TableRow, TableBody, TableFooter, TableRowColumn, TableHeaderColumn } from 'material-ui';
 import Row from './FlexboxGrid/Row.js';
 import Col from './FlexboxGrid/Col.js';
 import Box from './FlexboxGrid/Box.js';
@@ -13,7 +15,7 @@ import ace from 'brace';
 window.ace = ace;
 import AceEditor from './aceEditor';
 import AppBar from './appbar.js';
-import Settings from './settings';
+import Options from './options';
  
 import 'brace/mode/javascript';
 import 'brace/theme/monokai';
@@ -21,7 +23,7 @@ import 'brace/ext/searchbox';
 import 'brace/ext/settings_menu';
 import 'brace/ext/language_tools';
 
-import {route, editorValue, scripts, scriptTitleField, editorRelay} from './stores/main';
+import {route, editorValue, scripts, scriptTitleField, editorRelay, appTheme} from './stores/main';
 
 var Editor = React.createClass({
   getInitialState(){
@@ -92,11 +94,12 @@ var Root = React.createClass({
   mixins: [Reflux.ListenerMixin],
   getInitialState(){
     return {
-      route: v('#options').node() ? {id: 'settings', title: 'Settings'} : {id: 'index', title: 'Powermonkey'},
+      route: v('#options').node() ? {id: 'options', title: 'Options'} : {id: 'index', title: 'Powermonkey'},
       scriptTitleField: '',
       editorValue: '',
       scripts: [],
-      editor: null
+      editor: null,
+      appTheme: appTheme.get()
     };
   },
   componentWillMount(){
@@ -109,6 +112,15 @@ var Root = React.createClass({
     this.listenTo(scripts, this.scriptsChange);
     this.listenTo(scriptTitleField, this.scriptTitleFieldChange);
     this.listenTo(editorRelay, this.editorRelayChange);
+    this.listenTo(appTheme, this.appThemeChange);
+  },
+  childContextTypes : {
+    muiTheme: React.PropTypes.object,
+  },
+  getChildContext() {
+    return {
+      muiTheme: ThemeManager.getMuiTheme(this.state.appTheme),
+    };
   },
   routeChange(e){
     var s = this.state;
@@ -132,12 +144,15 @@ var Root = React.createClass({
   scriptTitleFieldChange(e){
     this.setState({scriptTitleField: e});
   },
+  appThemeChange(e){
+    this.setState({appTheme: e});
+  },
   render() {
     var s = this.state;
     return (
         <div {...this.props}>
-          <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField}/>
-          <Route route={s.route} editor={s.editor} editorValue={s.editorValue} />
+          <AppBar route={s.route} editorValue={s.editorValue} scripts={s.scripts} scriptTitleField={s.scriptTitleField} appTheme={s.appTheme} />
+          <Route route={s.route} editor={s.editor} editorValue={s.editorValue} scripts={s.scripts} appTheme={s.appTheme} />
         </div>
       );
     }
@@ -154,7 +169,7 @@ var Action = React.createClass({
     return (
       <div>
         <MenuItem onTouchTap={this.openApp} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText="Powermonkey" />
-        <MenuItem onTouchTap={()=>chrome.runtime.openOptionsPage()} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText="Settings" />
+        <MenuItem onTouchTap={()=>chrome.runtime.openOptionsPage()} style={{color: 'rgba(255, 255, 255, 0.81)'}} primaryText="Options" />
       </div>
     );
   }
