@@ -56,8 +56,7 @@ var Editor = React.createClass({
                 zDepth={ 1 }
                 rounded={ true }>
                 <AceEditor
-                    height="100%"
-                    width="100%"
+                    style={{width: '100%', height: '95.951%'}}
                     fontSize={16}
                     mode="javascript"
                     theme="monokai"
